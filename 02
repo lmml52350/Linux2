@@ -1,0 +1,183 @@
+usb 삭제
+sound card 삭제
+print 삭제
+
+ctrl + alt 마우스 빠져나가기
+connect at .. cd전원 캬질때 자동으로Cinnected 켜짐
+(use iso..)가상cd 선택 > 부팅디스크 선택
+install Centos7 선택
+서버-Gui사용 선택
+
+설치대상 > 파티션을 설정합니다.> 완료 > 표준파티션 
+> swap(가상 메모리[숨겨진메모리] [사용자가 사용할수 x 파티션,]) 2048(시스템이사용한는용량을 설정) > 마운트 지점추가
++ 새로운 마운트 추가 >  / (남은용량 지정됨)
+/: 최상위 디렉터리 또는 리눅스 경로
+/ > 파일시스템 > ext4선택 > 완료 > 적용  > 설치시작
+root 암호 > P@ssw0rd
+리눅스 관리자 계정 : root {소문자}
+
+<원격 알아야 하는 이유 이유>
+1.서버 시스템은 모티터가 없음.(원격pc 필요)
+2.작업 효율성 극대화 
+tui > 터미널창
+cli > 콘솔창
+
+윈도우
+ipconfig - 아이피 확인
+
+
+ifconfig - 아이피 확인
+clear
+ens32: >> 
+lo >>> inet (localhost 개인주소)
+
+자동 
+192.168.100.1
+
+-------------------
+-cd: 디렉터리 경로 변경
+   :문법
+   cd <경로 대상>
+
+
+cd /
+#cp /etc/inittab/backup/login.defs
+
+#cd/ : 최상위 디텍터리로 변경
+#pwd 
+/home
+
+cd/home/samadal/: 최상위 하위에home/하위에 samadal/로 변경
+home/samadal
+
+1)절대경로 : (최상위)에서부터 시작!
+
+#cd ./ :현재 경로로 변경
+#pwd
+/home/samadal
+ㅔ
+#cd ../ : 현재 경로에서 상위 디렉토리 변경  ../는 상위경로 
+#pwd
+/home
+#cd ../../  : 현재경로에서 상위로 두번 변경 
+
+2) 상대경로 : 현재 위치에서부터 시작!
+cd ./test/c/d/
+ls-l
+
+//cd 사전작업
+# cd /home/samadal/
+#
+#pwd
+/home/samadal
+#
+#mkdir ./a/
+#
+#mkdir ./a/b/
+#
+#mkdir -p ../test/c/d/
+#
+#cd /home/test/c/d/
+#pwd
+/home/test/c/d
+//cd 사전작업
+# cd /home/samadal/
+#
+#pwd
+/home/samadal
+#
+#mkdir ./a/
+#
+#mkdir ./a/b/
+#
+#mkdir -p ../test/c/d/
+#
+#cd /home/test/c/d/
+#pwd
+/home/test/c/d
+ls -l>> 경로파일안에 뭐있나 ? 
+ㅌ//cd 사전작업
+# cd /home/samadal/
+#
+#pwd
+/home/samadal
+#
+#mkdir ./a/
+#
+#mkdir ./a/b/
+#
+#mkdir -p ../test/c/d/
+#
+#cd /home/test/c/d/
+#pwd
+/home/test/c/d
+
+ls >>> 파일확인, 나열
+ls [-옵션,--추가옵션] <대상1>띄여쓰기<대상2> 
+예 # ls -d ./ /home/samadal/
+
+
+ls -l >>> 파일속 뭐있나, 속성정보 출력
+
+#ls ./ /home/ :각경로 안에 있는 내용물 확인 (나열)
+#ls -a ./ : -a는 .으로 시작하는 "숨겨진것들도 모두 포함"해서 나열
+#ls -l 속성정보 자세히 출력확인
+drwxr-xr-x. 3 root root 4096  2월  8 15:05 a
+<맨왼쪽:데이터유형 ->d는 디렉터리,-는 파일>
+
+# ls -d ./ /home/samadal/
+-d는 디렉터리 자체를 나타냄(경로를 나열하지 않음)
+
+# ls -ld ./ /home/samadal/    (나열하지않고 점보만봄)
+drwx------. 4 samadal samadal 4096  2월  8 15:05 ./
+drwx------. 4 samadal samadal 4096  2월  8 15:05 /home/samadal/
+
+
+-R 
+#ls -R : R은 디렉토리 안에 있는 하위 디렉터리들도 모두 포함하여 나열
+
+-cp : 파일또는 디렉토리 복사.붙여넣기 (기본:파일만)
+1)하나복.붙 : cp [-옵션 필요시] <원본> <목적지>
+[목적지표현 3가지]
+1_1)원본 이름을 그래로 똑같이 써서 복.붙
+cp /backup/grub.cfg /grub.cfg
+1_2)원본 이름을 생략해서 복.붙
+cp /backup/grub.cfg ./
+1_3)원본 이름을 변경해서 복.붙 
+cp /backup/login.def  ./login
+
+[이름이 중복될 경우]
+cp /backup/grub.cfg /home/samadal    :복붙및 잘라내기.붙여넣기 할시. 
+이미 "동일한 이름이 존재할 경우"
+cp: overwrite `/home/samadal/grub.cfg'? 
+(y:적용, 나머지 : 취소)
+
+2)여러개 복.붙 
+cp [-옵션]<원본1> <원본2>.... <목적지>(마지막경로 목적지)
+
+# cp /backup/grub.cfg /etc/inittab /backup/login.defs ./a/b/
+
+cp /backup/*.cfg /backup/init??? /backup/login* ../test/c/d/
+와일드카드: 시스템 경로안에 있는 데이터 이름들을 대체해서 표현
+*:모든 글자들 
+?:글자 하나만 "반드시 대체"
+
+*.cfg는 .cfg로 끝나는 모든것들 
+login*은 login로 시작하는 모든것들 
+*init*은  init란 단어가 섞인
+
+
+#cp -r /backup/ ../test/c/   -r 가 있아야 "디렉토리도 복붙 가능"
+
+[잘라내기>붙혀넣기]
+- mv(move)   : 파일 또는 디렉터리를 옮김(잘라내기.붙여넣기)
+      [사용법, 특징 등 'cp'와 동일]
+      [cp가 할 수 있는 모든 기능은 mv도 다 할 수 있다.]
+
+   : 문법
+   mv <원본> <목적지>   : 단일 옮김
+   mv <원본1> .... <목적지> : 여러개 옮김
+
+# ls -l /backup/ ./a/
+# mv /backup/g* ./a/
+# ls -l /backup/ ./a/
