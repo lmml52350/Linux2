@@ -1,0 +1,113 @@
+웹 브라우저에 "웹서버" 주소 검색
+	http://192.168.10.128    testing123확인(웹페이지 기본경로:/var/www/html/)
+			<이 경로 안에 "index.html" 웹문서있으면,
+				웹 메인 페이지 변경>
+
+==========================================================================================
+작업
+1)윈도우에서 개인폴더에 index.html이란 파일을 만들어서 저장
+(내용은 아무거나 입력)
+
+2)index.html을 FTP로 samadal에 업로드
+   
+3)업로드한 index.html 파일을 웹 서버 경로에 옮기기
+
+4) 웹 새로 고침(결과: index.html내용 웹페이지에 나오면 성공)
+
+==========================================================================================
+작업1:	/var/www/html/의 index.html 문서파일 권한 변경
+
+
+	rw-r--r--(nm)
+	-w-r--r--(nm)
+	r--r--r--(nm)
+	rw----r--(nm)
+	rw-r-----(sm)
+
+
+[작업 끝나면, index.html 파일 권한 644로 되돌릴것]
+
+결과 : 마지막 640만 변화 
+원인 : other의 권한이 없어서, 웹은 기본적으로 other 권한
+==========================================================================================
+작업2:
+	/var/www/의 html/ 허가권 변경
+
+
+	rwxr-xr-x(nm)
+	-wxr-xr-x(nm)
+	r-xr-xr-x(nm)
+	rw-r-xr-x(nm)
+	rwx--xr-x(nm)
+	rwxr--r-x(nm)
+	rwxr-x--x(nm)
+	rwxr-xr--(sm)
+
+
+
+[작업 다하면, 반드시 /var/www/html/을 755로 돌려놓기]
+754만 변화
+원인 : other x접근 없어서, 안에 있는걸 불러올수 없음
+==========================================================================================
+실습3:
+/export/home/samadal/ 홈 디렉터리의 권한 변경
+
+000 ~ 700 까지 변경 후 FTP 접속 및 업로드
+	1)ftp 접속?, 2)업로드?index.html
+1)700	    O		O	
+2)600	
+3)500       0           x
+4)400
+5)300       O           O
+6)200
+7)100  
+8)000
+
+
+[작업 다하면, 반드시 samadal 홈디렉터리 허가권: 700으로 되돌릴것!]
+
+============================================================
+
+소유권(CHange OWNership)
+
+문법 -  # chown <uid:gid> <파일 또는 디렉터리들>
+
+내용물 없을경우: #cp /backup/* /export/home/samadal/
+
+#pwd
+/export/home/samadal
+#chown samadal grub.cfg		:uid만 변경
+#chown :samadal inittab		:gid만 변경
+#chown root:samadal grub.cfg	:uid,gid 변경 
+#chown samadal:	login.defs	:uid와 gid 동일하게 변경
+
+gid 와 uid 소속 확인 cat /etc/passwd | grep samadal
+
+
+계정복구 
+# cat /etc/passwd | grep user5
+# cat /etc/passwd | grep user3
+# ls -l /export/home/ /var/spool/mail
+/export/home/:
+합계 8
+drwx------. 5 samadal samadal 4096  2월 22 14:01 samadal
+drwx------  5    1205    1205 4096  2월 17 15:15 user5
+
+/var/spool/mail:
+합계 0
+-rw-rw----. 1 rpc     mail 0  2월  1 22:09 rpc
+-rw-rw----. 1 samadal mail 0  2월  1 22:15 samadal
+-rw-rw----  1    1205 mail 0  2월 17 15:09 user5
+login as: user5
+user5@192.168.1.128's password:
+'abrt-cli status' timed out
+[user5@localhost ~]$ pwd
+
+/export/home/user5
+[user5@localhost ~]$ ls -al
+합계 36
+모두바꿈
+
+메일파일 
+chown user5 /var/spool/mail/user5
+
