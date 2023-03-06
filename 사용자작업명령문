@@ -1,0 +1,430 @@
+========================================================================
+*사용자 생성, 수정, 삭제
+========================================================================
+
+사용자와 관련된 파일
+/etc/passwd  (사용자계정정보가 담긴 파일)
+/etc/shadow  (사용자계정비밀번호와 관련된 파일)
+/etc/group  (그룹계정정보가 담긴 파일: 계정접속과 관계 X)
+
+예시)
+# cat /etc/passwd | grep root
+root:x:0:0:root:/root:/bin/ksh
+
+# cat /etc/passwd | grep samadal
+samadal:x:1000:1000:samadal:/home/samadal:/bin/bash
+
+	-구조(/etc/passwd)ac
+
+samadal	: 사용자계정(UID)
+x			: 비밀번호   -> cat /etc/shadow 확인(UID:비밀번호자리)
+							|__ *: 설정 불가능, !!: 설정 안된 상태,
+							    특정글: 암호화 설정됨
+
+1000:1000	: UID(User ID), GID(Group ID)
+		1)숫자: 컴퓨터가 보는 ID식별값
+		2)문자: 사용자가 보는 관점(즉, 계정아이디)
+
+samadal		: Comment(닉네임, 부연설명)
+/home/samadal	: 사용자 계정 홈 디렉터리 정보
+/bin/bash	: 쉘 정보
+
+------------------------------------------------------------------------
+# chsh -l : 쉘 종류 확인
+
+/bin/sh	: 본 쉘[가장 오래된 쉘]
+/bin/bash	: 기본 배쉬쉘[UID@호스트명 경로]
+/usr/bin/sh
+/usr/bin/bash
+/bin/tcsh
+/bin/csh
+/bin/ksh	: 콘쉘(UNIX(유닉스))[프롬프트만]
+/bin/rksh
+#
+
+========================================================================
+1)사용자 생성
+	-문법
+	useradd [옵션1] [알맞은 값1] [옵션2] [값2] ... <계정명UID>
+
+# useradd user1
+[계정 작업시 항상 이 패턴대로 할 것!]li -ld /
+1_1)계정확인													: # tail -2 /etc/passwd  
+1_2)사용자 홈디렉터리정보와 실제 홈디렉터리 일치 확인	: # ls -l /home/
+1_3)비밀번호 부여 				 							: # passwd user1
+
+useradd 사용시 순차로 생성되는 것들(옵션 생략)
+1. UID계정  <1002>
+2. 동일한 이름 GID계정 <1000>
+3. 계정 홈디렉터리 생성
+4. 사용자 개인 메일 파일 : # ls -l /var/spool/mail/ (로그파일)
+
+------------------------------------------------------------------------
+#useradd -u 1200 -g 1000 -c testuser -s /bin/sh user2
+#tail -4 /etc/passwd
+#ls -l /home/
+#passwd user2
+-u: uid값 변경, -g : 존재하는 그룹(주요그룹)으로 변경 -c : 코멘트, -s: 쉘 변경
+
+------------------------------------------------------------------------
+<사용자 계정 홈 디렉터리 변경해서 생성>
+#mkdir /cloud/			-> 없는 경로는 반드시 생성!
+#useradd -d /cloud/user3 user3	-> user3계정 생성시 /cloud/하위에 user3이란 이름으로 홈디렉터리 생성
+#tail -5 /etc/passwd
+#ls -l /home/ /cloud/
+-d: 사용자의 기본 홈 디렉터리의 정보를 변경
+[홈디렉터리이름과 계정이름은 항상 일치 시킬 것!]
+
+--------------------------------------------------------
+<유의사항>
+# useradd -d /cloud user33		[문제]
+useradd: 경고: 홈디렉터리가 이미 있습니다.
+skel 디렉터리에서 파일을 e복사하지 않습니다.
+[결과: 홈디렉터리가 생성 되질 X, 계정은 생성]
+[단, 메일 파일 생성]
+
+
+# useradd -d /linux/user333(홈디렉토리) user333	[오류]
+useradd: 디렉터리 /linux/user333을(를) 만들 수 없습니다
+[결과: 홈디렉터리가 생성 되질 X, 계정은 생성]
+[useradd 명령문 중단으로 메일 파일 생성 X]
+
+
+--------------------------------------------------------
+
+1_4)skel[스켈] 생성 -> 자동 생성 디렉터리라고도 부름
+#ls -la /etc/skel/
+skel이란?
+/etc/skel/ 안에 파일과 디렉터리를 생성하면,
+"사용자를 생성시, 사용자의 홈 디렉터리에 자동으로
+스켈 안에 있는 것들이 복사"되서 사용자의 홈 디렉터리에
+만들어짐.
+
+:예
+1#touch /etc/skel/sam
+2#ls -al /etc/skel/
+3#useradd user4
+4#tail -8 /etc/passwd
+5#passwd user4
+확인: user1, user4 로그인해서 비교
+
+
+
+
+예제: '/etc/skel/'안에 있는 모든 내용을
+     '/etc/samskel/'에 복사 할 것.
+
+[단, 디렉터리 자체를 복사하지 말 것.]
+[.*은 무슨 일이 있어도 쓰지 말 것] 
+
+#mkdir /etc/samskel/
+#cd /etc/skel/
+#cp -r .m* .b* .k* * /etc/samskel/
+
+
+
+
+#mv /etc/samskel/sam /etc/samskel/mas
+
+#useradd -mk /etc/samskel user5
+#
+#tail -8 /etc/passwd
+#passwd user5
+$ls -al
+[-m: /etc/samskel로 이동해서 -k: samskel 데이터 복사]
+[함께 써야하며, -m -k 순서는 반드시 지켜야한다.]
+=========================================================
+작업1:
+ 
+useradd -mk /etc/samskel user5
+tail -9 /etc/samskel
+ls -l /home/
+passwd /user5
+
+
+=========================================================
+
+2)사용자 수정(사용자 생성과 문법이 동일, 단, 차이점은 약간 있음)
+-문법
+usermod [옵션1] [값1] [옵션2] [값2] ... <사용자계정UID>
+-s:shell 변경, -c:닉네임 변경, -u: uid 변경(동일한UID는 X), -g: 그룹 계정 변경
+-d: 사용자 홈디렉터리의 정보 변경
+:예
+#tail -[생성한 갯수만큼] /etc/passwd
+
+# usermod -u 1002 -g user1 -c user2 -s /bin/csh user2
+	
+
+=====
+작업
+
+test:x:1206:1206::/usertest/test:/bin/csh
+test1:x:1207:1207:test1:/usertest/test1:/bin/tcsh
+
+/usertest/test(사용자)/public(자동생성되는디렉터리)/
+
+1)/etc/skel/을 이용해서 생성
+
+2)사용자 지정 스켈 디렉터리를 이용해서 생성
+
+[단, test사용자를 잘못 만들시 test1,test2,...]
+
+
+# ls -al /etc/skel
+합계 36
+drwxr-xr-x.   3 root root  4096  2월 17 14:47 .
+drwxr-xr-x. 143 root root 12288  2월 17 15:09 ..
+-rw-r--r--.   1 root root    18 11월 25  2021 .bash_logout
+-rw-r--r--.   1 root root   193 11월 25  2021 .bash_profile
+-rw-r--r--.   1 root root   231 11월 25  2021 .bashrc
+-rw-r--r--    1 root root   172  8월 11  2022 .kshrc
+drwxr-xr-x.   4 root root  4096  2월  1 22:07 .mozilla
+-rw-r--r--    1 root root     0  2월 17 14:47 sam
+# mkdir /etc/skel/public/
+# ls -ld /usertest/; ls -al /etc/skel/
+drwxr-xr-x 2 root root 4096  2월 20 12:42 /usertest/
+합계 40
+drwxr-xr-x.   4 root root  4096  2월 20 12:43 .
+drwxr-xr-x. 143 root root 12288  2월 17 15:09 ..
+-rw-r--r--.   1 root root    18 11월 25  2021 .bash_logout
+-rw-r--r--.   1 root root   193 11월 25  2021 .bash_profile
+-rw-r--r--.   1 root root   231 11월 25  2021 .bashrc
+-rw-r--r--    1 root root   172  8월 11  2022 .kshrc
+drwxr-xr-x.   4 root root  4096  2월  1 22:07 .mozilla
+drwxr-xr-x    2 root root  4096  2월 20 12:43 public
+-rw-r--r--    1 root root     0  2월 17 14:47 sam
+# useradd -s /bin/csh -d /usertest/test test
+# cat /etc/passwd | grep test
+user2:x:1200:1000:testuser:/home/user2:/bin/sh
+test:x:1206:1206::/usertest/test:/bin/csh
+# ls -l /usertest/
+합계 4
+drwx------ 4 test test 4096  2월 20 12:45 test
+
+# passwd test
+
+=====
+# mkdir -p etc/samskel/public
+# ls -al /etc/samskel
+합계 36
+drwxr-xr-x    3 root root  4096  2월 17 15:07 .
+drwxr-xr-x. 143 root root 12288  2월 20 12:46 ..
+-rw-r--r--    1 root root    18  2월 17 15:06 .bash_logout
+-rw-r--r--    1 root root   193  2월 17 15:06 .bash_profile
+-rw-r--r--    1 root root   231  2월 17 15:06 .bashrc
+-rw-r--r--    1 root root   172  2월 17 15:06 .kshrc
+drwxr-xr-x    4 root root  4096  2월 17 15:06 .mozilla
+-rw-r--r--    1 root root     0  2월 17 15:06 mas
+# mkdit -p /etc/samskel/public
+-ksh: mkdit: not found [그런 파일이나 디렉터리가 없습니다]
+# mkdir -p etc/samskel/public/
+# useradd -c test1 -s /bin/tcsh -mk /etc/samskel -d /usertest/test1 test1
+
+# ls -l /usertest
+합계 8
+drwx------ 4 test  test  4096  2월 20 12:45 test
+drwx------ 3 test1 test1 4096  2월 20 12:52 test1
+# password test1
+
+# cat /etc/passwd | grep user2
+user2:x:1200:1000:testuser:/home/user2:/bin/sh
+# ls -l /home
+# usermod -u 1002 -g user1 -c user -s /bin/ksh user2
+
+cat /etc/passwd | grep user2
+ls -l /home/
+# usermod -u 1002 user2
+
+
+--------------------------------------------------------
+<usermod의 사용자 홈디렉터리 변경법>
+
+#mkdir -p /export/home/  	-> 없는 경로는 반드시 생성!
+1)변경전 확인
+#cat /etc/passwd | grep samadal
+
+2)홈디렉터리 정보 변경
+#usermod -d /export/home/samadal samadal	-> 정보 변경 후,
+	1]/etc/passwd 확인!
+	2]#ls -l /home/ /export/home/
+
+3)실제 홈디렉터리 옮긴다!
+#mv /home/samadal/ /export/home/	-> 수동 mv로 옮길 것!
+#ls -l /export/home/
+samadal$ 접속
+[항상, 1),2),3) 패턴으로 해줄 것!]
+
+<사용자 변경 및 삭제시 주의사항>
+
+# usermod -d /export/home/user5 user5
+usermod: user user5 is currently used by process 9211
+
+
+[사용자 계정 접속중 일때, 변경 및 삭제가 되지않음]
+[해결 : 사용종료후 작업]
+--------------------------------------------------------
+3)
+# cat /etc/passwd | grep samadal
+samadal:x:1000:1000:samadal:/export/home/samadal:/bin/bash
+# ls -l /export/home
+합계 0
+# find / -name "samadal" -type d | nl
+
+     1  /home/samadal
+#
+# mv /home/samadal/ /export/home/
+# ls -l /export/home
+합계 4
+drwx------. 4 samadal samadal 4096  2월 16 15:11 samadal
+
+
+
+작업2:
+
+
+1시 - 5시 
+
+
+ 
+
+
+
+
+
+=========================================================
+3)사용자 삭제
+	-문법
+	userdel [옵션] <사용자UID>
+
+1)'계정만' 삭제
+#userdel user5
+#
+#tail -12 /etc/passwd   : [user5 삭제], [같이 쓰는 그룹계정 삭제]
+#ls -l /export/home/ /var/spool/mail/ : [user5 존재]
+
+2)'계정과 관련된 것들 모두 삭제'
+#userdel -r test 
+#
+========================================================================
+작업3:
+# userdel user5
+# tail /etc/passwd
+
+# passwd user5
+passwd: 알 수 없는 사용자 이름 'user5'.
+#
+# tail /etc/group
+samadal:x:1000:samadal
+apache:x:48:
+uesr1:x:1001:
+user1:x:1002:
+user3:x:1201:
+user33:x:1202:
+user333:x:1203:
+user4:x:1204:
+test:x:1206:
+test1:x:1207:
+# ls -l /export/home/
+합계 8
+drwx------  5    1205    1205 4096  2월 17 15:15 user5
+# ls -l /var/spool/mail/
+-rw-rw----  1    1205 mail 0  2월 17 15:09 user5
+
+<홈디렉터리 남아있음, 계정을 나중에 복구할수 있음. 계정만 못쓰게 삭제>
+
+
+
+
+========================================================================
+그룹 생성, 수정, 삭제
+
+/etc/group : 그룹 계정 정보
+
+samadal:x:1000:samadal
+					<그룹에 소속된 사용자UID>
+그룹 생성
+	#groupadd s1
+	#
+	#tail -2 /etc/group
+
+	#groupadd -g 1200 s2
+
+그룹 변경
+	#groupmod -g 1002 s2
+
+그룹 삭제
+	#groupdel s1
+	#groupdel s2
+	#gropdel user1
+
+========================================================================
+사용자 총실습
+
+
+
+===================================
+Test)사용자testuser를 조건에 맞게 구현 
+
+USER		: testuser
+UID		: 1300
+GID		: tg
+SHELL		: ksh
+$HOME		: /hosting/
+SKEL		: /skelsam
+자동 생성될 디렉터리: public_html/
+자동 생성될 파일	: .sam -> 단, 내용은 userid is testuser 라는 내용 입력해서 저장
+==============
+//샘플답:
+#groupadd tg	[tg 그룹 생성]
+#mkdir -p /hosting/ /skelsam/
+#cd /etc/skel/
+#cp -r .m* .b* .k* /skelsam/
+#mkdir /skelsam/public_html/
+#cat >> /skelsam/.sam		또는 vi
+userid is testuser
+#
+
+#useradd -u 1300 -g tg -s /bin/ksh -mk /skelsam -d /hosting/testuser testuser [testuser를 옵션대로 생성]  - 만일 잘못됬으면 계정 삭제나 계정 수정 할 것.
+
+[확인 및 접속]
+#cat /etc/passwd | grep testuser
+#tail -1 /etc/group     : tg 그룹
+
+$ls -al
+
+============
+
+-rw-r--r--. 1 root root 5210  2월  1 13:27 grub.cfg   644
+허가권 (8진법)
+마지막 점 의미 없음   
+r = 4 w = 2 x = 1
+
+소유권
+[사용자uid](r,w,x)
+[그룹자gid] (r,-,x) 
+[다른사용자other](r,-,x)
+d > 다랙토리 ,   - 파일
+b,c > 블럭테이터 (기계만 알아드듣는 데이터)
+
+drwx------. 4 samadal user1 4096  2월 16 15:11 samadal 701
+uid > samadal  임으로 rwx
+user1 그룹속 소속되어 있는지
+
+r (일기) : 
+1)파일 > 파일안에 적힌 내용이 버이는지  cat, vi cp(cp중 복사 r기능필요 )
+2)디렉터리 > 디렉토리 안에 내용물이 보이는지 ls -l
+
+w (쓰기) :
+변화,생성,삭제    vi 쓰기 커멘드, mkdir touch, cat> ,cp(cp중붙혀넣기 w기능필요 ) 
+
+x (extract) :
+1) 파일 > x가 없으면 문서파일 , x가 있으면 실행파일
+2) 디레토리 > 디렉터리 안으로 들어갈수 있는지 ,있으면 접근가능 cd
+
+permit allow listen deny
+
+-권한 permisstion   -허가권 chmod
+1)숫자 644 > 623
+2)문자(띄여쓰기 없음)  chmod g-r+w,o-r-wx grub.cfg
+
+
