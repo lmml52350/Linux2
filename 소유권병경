@@ -1,0 +1,12 @@
+소유권(CHange OWNership)
+
+문법 -  # chown <uid:gid> <파일 또는 디렉터리들>
+
+내용물 없을경우: #cp /backup/* /export/home/samadal/
+
+#pwd
+/export/home/samadal
+#chown samadal grub.cfg		:uid만 변경
+#chown :samadal inittab		:gid만 변경
+#chown root:samadal grub.cfg	:uid,gid 변경 
+#chown samadal:	login.defs	:uid와 gid 동일하게 변경
