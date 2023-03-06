@@ -1,0 +1,19 @@
+<yum(Yellowdog Updater Modified)] : 패키지 자동 작업 해주는 실행파일
+[사용법]
+#yum -y install <패키지명들>	=>패키지 자동 설치
+ex) yum -y install mariadb-*
+#yum -y remove	<패키지명들>	=>패키지 자동 삭제
+ex) yum -y remove bind-*
+
+#yum -y install <패키지명-버전*>    => 버전별 패키지 작업
+---------------------------
+
+<현재 압축파일엔 yum이 없어서 cp -p /etc/samadal_yum /usr/bin/yum 해야함>
+
+yum유의사항
+0)항상, 최신 업데이트로 설치가 됨.
+1)인터넷 사용이 안되면 사용 못하는 명령어입니다. (DNS: 네임서버 조회)
+2)인터넷 공식 홈피에 없는 패키지는 작업 불가능(rpm 필요!)
+3)yum 사용시 절.대 현재 위치에 작업할 패키지 "이름"과 연관되있는 이름이 있으면 X
+  특히, CDROM 마운트 연동한 Packages/ 안에선 yum은 절.대 해서는 안 된다.
+
