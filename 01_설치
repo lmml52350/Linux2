@@ -1,0 +1,113 @@
+서버 - 기업용: 서비스제공
+클라이언트 - 일반용 : 서비스이용[요청]
+
+os: 운영체제
+윈도우
+- window
+리눅스 
+-Debian계열: 
+	1)Debian (유로및무료)
+	2)ubuntu(무료개발 데스크톱용)
+-Redhat계열:
+	1)Redhat(유로및무료)
+	2)fedora(무료)
+	3)Centos(무료)
+
+장비 
+-마우스: GUI(그래픽모드)
+Graphical
+User
+interface
+
+키보드: TUI또는 CLI(명령어모드)
+Text
+Uer
+Interface
+
+Command
+Line
+Interface
+
+localhost (개인pc)
+
+vm설치방법 <가상pc생성방법>
+Custom > 3번쨰선택(iwill install..),  2번쨰(installer..)[가상미니cd]  
+> centos7(os계열선택) > 이름(CentOS_9_2009),경로선택 
+> NAT(vm용 가상공유기) > creater a new > singlefile
+
+putty
+root , P@ssw0rd
+
+프롬프트(시스템 안에 어떤 사용자 권한으로 명령어를 사용하기 위한 표시 기호)
+
+
+---------------------------------------------------
+
+Linux 설치
+   1. 가상머신 생성
+	VMware 프로그램 실행 -> home tab -> create a new virtual machine -> custom -> 기본값
+	-> I will install the operating system later -> Linux / CentOS 7 64-bit
+	-> 가상머신 이름 server -> location 변경 -> 나머지 전부 기본값
+
+   2. 운영체제 설치
+	settings -> CD/DVD -> Use ISO image file -> browse -> iso 이미지파일 선택 -> 열기
+	-> power on -> 가상머신 화면 클릭 -> install centos 7 -> 사용언어 : 한국어
+	-> 소프트웨어 설정 : 서버 - GUI 사용(우측 추가기능 : 개발용 툴) -> 완료
+	-> 설치대상 -> 하단부 '파티션을 설정합니다' 선택 후 완료 -> 좌측 'LVM'을 '표준 파티션'으로 변경
+	-> 좌측하단 '+' 클릭하여 마운트 지점 3개 추가(마운트 지점은 입력하지 말고 목록에서 선택)
+		1) /boot - 1024
+		2) swap - 2048
+		3) / - 생략(남은 용량 전체)
+	-> 완료 -> 변경 사항 적용 -> 네트워크 및 호스트명 -> 우측 상단 스위치(끔) 클릭(켬으로 변경)
+	-> 아래쪽 호스트 이름 server 입력 -> 적용 누른 후 오른쪽에 변경된 것 확인
+	-> 완료 -> 설치 시작 -> root 암호 -> 암호 : itbank -> 완료 두 번 클릭 -> 사용자 생성
+		성명 : 아무거나
+		사용자 이름 : itbank
+		암호 : itbank
+	-> 완료 두 번 클릭 -> 설치 완료 후 재부팅 -> License Information -> 약관 동의 후 완료 -> 설정 완료
+
+   3. 로그인
+	목록에 없습니까? 선택 -> ID : root, 암호 : itbank
+
+	(첫 로그인 시 추가 설정 화면 나올경우 진행) 사용언어 : 한국어 -> 입력 : 101/104키 호환
+	-> 위치 정보 서비스 : 끔 -> 온라인 계정 연결 : 건너뛰기 -> CentOS Linux 시작 -> '시작하기' 창 종료
+
+   4. IP설정(관리자로 로그인하여 진행)
+	프로그램 -> 시스템 도구 -> 설정 -> 네트워크 -> 유선 항목 톱니바퀴 클릭
+	-> 자동으로 연결 / 다른 사용자가 사용할 수 있게 허용 체크되어 있는거 확인 -> IPv4 클릭 -> IPv4방식 : 수동
+	-> 주소 : XXX.XXX.XXX.128, 네트마스크 : 255.255.255.0, 게이트웨이/네임서버(DNS) : XXX.XXX.XXX.2
+	-> 적용 -> 유선 스위치 껐다가 다시 켜기
+
+    * IP설정 중 XXX.XXX.XXX 확인 방법
+	(VMware 메뉴) edit -> virtual network editor -> VMnet8이 NAT인지 확인
+	-> NAT의 Subnet Address에서 마지막 0을 뺀 나머지 사용
+
+    * IP 확인
+	바탕화면에서 마우스 오른쪽 버튼 클릭 -> 터미널 열기 -> ifconfig 명령어 입력 -> ensXX 영역 inet 확인
+
+   5. selinux 종료
+	바탕화면에서 마우스 오른쪽 버튼 클릭 -> 터미널 열기 -> gedit /etc/selinux/config 입력
+	-> 내용 중 SELINUX=enforcing 을 SELINUX=disabled 로 변경 -> 저장 -> 종료
+	-> 터미널에 reboot 입력(재부팅 후 적용)
+
+Putty를 이용한 원격 접속
+   1. 원격 접속을 위한 putty 설정
+	창 - 모양 -> 글꼴 설정 -> 터미널 기본/유니코드 둘 다 change -> 글꼴 : consolas, 굵게
+	창 - 변환 -> 수신한 데이터 문자셋 : UTF-8
+	접속 - ssh - 키교환 -> 암호 알고리즘 선택 정책에서 '디피-헬만 그룹 14' 항목을 가장 위로 올리기
+	세션 -> Host Name : Linux IP주소 입력 -> 저장된 세션 : 저장할 이름 입력 -> 저장
+
+   2. 접속 방법
+	저장된 세션 목록 -> 저장된 항목 더블클릭 (or 저장된 항목 클릭 -> 불러옴 -> 열기)
+	-> 경고 창 나오면 예 클릭 -> login as: 뒤에 계정명 'root' 입력
+	-> 암호 입력(화면에 안보일 뿐이지 입력중이니 암호 전체 입력)
+
+VMware snapshot
+ - 가상머신의 현재 상태를 저장해놓고 필요할때 현재 상태로 되돌릴 수 있게 해주는 기능
+
+ - 스냅샷 저장
+	VM -> snapshot -> snapshot manager -> take snapshot -> 이름, 설명 작성 -> take snapshot
+	화면에 작성한 이름으로 시계모양 아이콘 만들어 지면 성공
+
+ - 스냅샷 이용한 가상머신 되돌리기
+	VM -> snapshot -> snapshot manager -> 되돌릴 스냅샷 선택 -> go to -> yes
